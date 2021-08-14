@@ -10,7 +10,6 @@ class TUMDatasetPlayer : public BasicDatasetPlayer
 {
 public:
 	TUMDatasetPlayer();
-
 private:
 	// TODO
 }; // end class TUMDataset

@@ -1,0 +1,13 @@
+<launch>
+	<param name="pointcloud_publish_topic" type="string" value="velodyne_points"/>
+	<param name="pointcloud_publish_rate" type="double" value="10"/>
+	<param name="path_of_dataset" type="string" value="/home/lne/docker/project/catkin_ws/dataset/kitti/dataset"/>
+	<param name="which_sequence" type="string" value="00"/>
+	<param name="frame_id" type="string" value="velodyne"/>
+
+	<param name="datasetType" type="string" value="KITTI"/>
+
+	<node pkg="dataset_player" type="dataset_player_node" name="dataset_player_node" output="screen"/>
+
+	<!-- node pkg="rviz" type="rviz" name="rviz" args="-d $(find dataset_player)/rviz/datasetplayer.rviz" required="true" / -->
+</launch>

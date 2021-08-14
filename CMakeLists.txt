@@ -19,9 +19,11 @@ include_directories(
 
 set(SRC
     lib/common.cpp
-    lib/BaseDatasetPlayer.cpp
+    lib/BasicDatasetPlayer.cpp
     lib/KITTIDatasetPlayer.cpp
-    lib/TUMDatasetPlayer.cpp)
+    lib/TUMDatasetPlayer.cpp
+    lib/DatasetPlayer.cpp
+)
 
 add_library(${PROJECT_NAME}
   ${SRC}

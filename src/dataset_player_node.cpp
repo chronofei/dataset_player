@@ -1,9 +1,20 @@
 // dataset_player
-#include "dataset_player/KITTIDatasetPlayer.h"
-#include "dataset_player/TUMDatasetPlayer.h"
+#include "dataset_player/DatasetPlayer.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
-	std::cout << "Hello World!" << std::endl;
+	ros::init(argc, argv, "datasetPlayer");
+	ros::NodeHandle node;
+	ros::NodeHandle privateNode("~");
+
+	std::cout << "zheng linfei" << std::endl;
+	
+	dataset_player::DatasetPlayer datasetPlayer;
+
+	if (datasetPlayer.setup(node, privateNode))
+	{
+		datasetPlayer.spin();
+	}
+
 	return 0;
 }

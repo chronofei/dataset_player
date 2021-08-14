@@ -10,7 +10,6 @@ class KITTIDatasetPlayer : public BasicDatasetPlayer
 {
 public:
 	KITTIDatasetPlayer();
-
 private:
 	// TODO
 }; // end class KITTIDataset
