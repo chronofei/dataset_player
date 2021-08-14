@@ -5,9 +5,17 @@
 	<param name="which_sequence" type="string" value="00"/>
 	<param name="frame_id" type="string" value="velodyne"/>
 
-	<param name="datasetType" type="string" value="KITTI"/>
-
-	<node pkg="dataset_player" type="dataset_player_node" name="dataset_player_node" output="screen"/>
+	<node pkg="dataset_player" type="dataset_player_node" name="dataset_player_node" output="screen">
+		<param name="datasetType" type="string" value="KITTI"/>
+		<param name="pubPointCloud" type="bool" value="true"/>
+		<param name="pointCloudTopic" type="string" value="/velodyne_points"/>
+		<param name="pubImageColor" type="bool" value="true"/>
+		<param name="imageColorTopic" type="string" value="/camera/color"/>
+		<param name="pubImageGry" type="bool" value="true"/>
+		<param name="imageGryTopic" type="string" value="/camera/gry"/>
+		<param name="pubGroundTruth" type="bool" value="true"/>
+		<param name="groundTruthTopic" type="string" value="/imu/data"/>
+	</node>
 
 	<!-- node pkg="rviz" type="rviz" name="rviz" args="-d $(find dataset_player)/rviz/datasetplayer.rviz" required="true" / -->
 </launch>

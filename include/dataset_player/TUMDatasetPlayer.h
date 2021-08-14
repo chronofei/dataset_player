@@ -9,7 +9,8 @@ namespace dataset_player
 class TUMDatasetPlayer : public BasicDatasetPlayer
 {
 public:
-	TUMDatasetPlayer();
+	TUMDatasetPlayer(ros::NodeHandle node);
+	bool process();
 private:
 	// TODO
 }; // end class TUMDataset

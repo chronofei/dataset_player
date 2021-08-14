@@ -3,9 +3,16 @@
 namespace dataset_player
 {
 
-TUMDatasetPlayer::TUMDatasetPlayer()
+TUMDatasetPlayer::TUMDatasetPlayer(ros::NodeHandle node)
+: BasicDatasetPlayer(node)
 {
 	// TODO
+}
+
+bool TUMDatasetPlayer::process()
+{
+	// TODO
+	return true;
 }
 
 } // end namesapce dataset_player

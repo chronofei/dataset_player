@@ -12,6 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
 )
 
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES dataset_player
+#  CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs nav_msgs pcl_ros sensor_msgs std_msgs tf tf2
+#  DEPENDS system_lib
+)
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}

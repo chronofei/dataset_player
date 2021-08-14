@@ -6,8 +6,6 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "datasetPlayer");
 	ros::NodeHandle node;
 	ros::NodeHandle privateNode("~");
-
-	std::cout << "zheng linfei" << std::endl;
 	
 	dataset_player::DatasetPlayer datasetPlayer;
 

@@ -6,7 +6,6 @@
 
 // ros
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
 
 namespace dataset_player
 {
@@ -27,14 +26,6 @@ private:
 	BasicDatasetPlayer *_basicDatasetPlayer;
 
 	DatasetType _datasetType;
-
-	ros::Publisher _pubPointCloud;
-
-	ros::Publisher _pubImageColor;
-	ros::Publisher _pubImageGry;
-	ros::Publisher _pubImageDepth;
-
-	ros::Publisher _pubGroundTruth;
 }; // end class DatasetPlayer
 
 } // end namespace dataset_player

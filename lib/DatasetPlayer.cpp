@@ -11,107 +11,171 @@ DatasetPlayer::DatasetPlayer()
 bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 {
 	std::string sParam;
-	bool bParam;
+	bool        bParam;
+	float       fParam;
 
 	if (privateNode.getParam("datasetType", sParam))
 	{
 		if (sParam == "KITTI")
 		{
-			ROS_INFO("Set datasetType: KITTI");
+			ROS_INFO_STREAM("Set datasetType: KITTI");
 			_datasetType = DatasetType::KITTI;
-			_basicDatasetPlayer = new KITTIDatasetPlayer;
+			_basicDatasetPlayer = new KITTIDatasetPlayer(node);
 		}
 		else if (sParam == "TUM")
 		{
-			ROS_INFO("Set datasetType: TUM");
+			ROS_INFO_STREAM("Set datasetType: TUM");
 			_datasetType = DatasetType::TUM;
-			_basicDatasetPlayer = new TUMDatasetPlayer;
+			_basicDatasetPlayer = new TUMDatasetPlayer(node);
 		}
 		else
 		{
-			ROS_ERROR("Invalid datasetType parameter: %s", sParam);
+			ROS_ERROR_STREAM("Invalid datasetType parameter: " << sParam);
 			return false;
 		}
 	}
 	else
 	{
-		ROS_ERROR("Unable to get the type of dataset");
+		ROS_ERROR_STREAM("Unable to get the type of dataset");
 		return false;
 	}
 
 	if(_datasetType == DatasetType::TUM)
 	{
-		// if (privateNode.getParam("pubRGB", bParam))
-		// {
-		// 	if(bParam)
-		// 	{
-		// 		_pubImageColor = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 1);
-		// 	}
-		// 	_basicDatasetPlayer->setPubRGB(bParam);
-		// }
-
-		// if (parivateNode.getParam("pubDepth", bParam))
-		// {
-		// 	if (bParam)
-		// 	{
-		// 		_pubImageColor = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 1);
-		// 	}
-		// 	_basicDatasetPlayer->setPubDepth(bParam);
-		// }
-
-		// if (privateNode.getParam("pubGroundTruth", bParam))
-		// {
-		// 	if (bParam)
-		// 	{
-		// 		_pubImageColor = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 1);
-		// 	}
-		// 	_basicDatasetPlayer->setPubGroundTruth(bParam);
-		// }
+		if (privateNode.getParam("pubImageDepth", bParam) && bParam)
+		{
+			_basicDatasetPlayer->setPubImageDepth(true);
+			ROS_INFO_STREAM("Set pubImageDepth: TRUE");
+			if (privateNode.getParam("imageDepthTopic", sParam))
+			{
+				ROS_INFO_STREAM("Set imageDepthTopic: " << sParam);
+				_basicDatasetPlayer->setImageDepthTopic(sParam);
+			}
+			else
+				ROS_INFO_STREAM("Set imageDepthTopic: morenzhi");
+			if (privateNode.getParam("imageDepthRate", fParam))
+			{
+				ROS_INFO_STREAM("Set imageDepthRate: " << fParam);
+				_basicDatasetPlayer->setImageDepthRate(fParam);
+			}
+			else
+				ROS_INFO_STREAM("Set imageDepthRate: morenzhi");
+		}
+		else
+		{
+			_basicDatasetPlayer->setPubImageDepth(false);
+			ROS_INFO_STREAM("Set imageDepthTopic: FALSE");
+		}
 	}
 	else if (_datasetType == DatasetType::KITTI)
 	{
-		if (privateNode.getParam("pubPointCloud", bParam))
+		if (privateNode.getParam("pubPointCloud", bParam) && bParam)
 		{
-			if (bParam)
+			_basicDatasetPlayer->setPubPointCloud(true);
+			ROS_INFO_STREAM("Set pubPointCloud: TRUE");
+			if (privateNode.getParam("pointCloudTopic", sParam))
 			{
-				_pubPointCloud = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 1);
+				ROS_INFO_STREAM("Set pointCloudTopic: " << sParam);
+				_basicDatasetPlayer->setPointCloudTopic(sParam);
 			}
-			_basicDatasetPlayer->setPubPointCloud(bParam);
-
+			else
+				ROS_INFO_STREAM("Set pointCloudTopic: morenzhi");
+			if (privateNode.getParam("pointCloudRate", fParam))
+			{
+				ROS_INFO_STREAM("Set pointCloudRate: " << fParam);
+				_basicDatasetPlayer->setPointCloudRate(fParam);
+			}
+			else
+				ROS_INFO_STREAM("Set pointCloudRate: morenzhi");
 		}
-		// if (privateNode.getParam("pubColor", bParam))
-		// {
-		// 	if (bParam)
-		// 	{
-		// 		_pubImageColor = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 1);
-		// 	}
-		// 	_basicDatasetPlayer->setPubColor(bParam);
-		// }
-		// if (privateNode.getParam("pubGry", bParam))
-		// {
-		// 	if (bParam)
-		// 	{
-		// 		_pubImageGry = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 1);
-		// 	}
-		// 	_basicDatasetPlayer->setPubGry(bParam);
-		// }
-		// if (privateNode.getParam("pubGroundTruth", bParam))
-		// {
-		// 	if (bParam)
-		// 	{
-		// 		_pubGroundTruth = node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 1);
-		// 	}
-		// 	_basicDatasetPlayer->setPubGroundTruth(bParam);
-		// }
+		else
+		{
+			_basicDatasetPlayer->setPubPointCloud(false);
+			ROS_INFO_STREAM("Set pubPointCloud: FALSE");
+		}
+
+		if (privateNode.getParam("pubImageGry", bParam) && bParam)
+		{
+			_basicDatasetPlayer->setPubImageGry(true);
+			ROS_INFO_STREAM("Set pubImageGry: TRUE");
+			if (privateNode.getParam("imageGryTopic", sParam))
+			{
+				ROS_INFO_STREAM("Set imageGryTopic: " << sParam);
+				_basicDatasetPlayer->setImageGryTopic(sParam);
+			}
+			else
+				ROS_INFO_STREAM("Set imageGryTopic: morenzhi");
+			if (privateNode.getParam("imageGryRate", fParam))
+			{
+				ROS_INFO_STREAM("Set imageGryRate: " << fParam);
+				_basicDatasetPlayer->setImageGryRate(fParam);
+			}
+			else
+				ROS_INFO_STREAM("Set imageGryRate: morenzhi");
+		}
+		else
+		{
+			_basicDatasetPlayer->setPubImageGry(false);
+			ROS_INFO_STREAM("Set pubImageGry: FALSE");
+		}
+	}
+
+	if (privateNode.getParam("pubImageColor", bParam) && bParam)
+	{
+		_basicDatasetPlayer->setPubImageColor(true);
+		ROS_INFO_STREAM("Set pubImageColor: TRUE");
+		if (privateNode.getParam("imageColorTopic", sParam))
+		{
+			ROS_INFO_STREAM("Set imageColorTopic: " << sParam);
+			_basicDatasetPlayer->setImageColorTopic(sParam);
+		}
+		else
+			ROS_INFO_STREAM("Set imageColorTopic: morenzhi");
+		if (privateNode.getParam("imageColorRate", fParam))
+		{
+			ROS_INFO_STREAM("Set imageColorRate: " << fParam);
+			_basicDatasetPlayer->setImageColorRate(fParam);
+		}
+		else
+			ROS_INFO_STREAM("Set imageColorRate: morenzhi");
+	}
+	else
+	{
+		_basicDatasetPlayer->setPubImageColor(false);
+		ROS_INFO_STREAM("Set pubImageColor: FALSE");
+	}
+
+	if (privateNode.getParam("pubGroundTruth", bParam) && bParam)
+	{
+		_basicDatasetPlayer->setPubGroundTruth(true);
+		ROS_INFO_STREAM("Set pubGroundTruth: TRUE");
+		if (privateNode.getParam("groundTruthTopic", sParam))
+		{
+			ROS_INFO_STREAM("Set groundTruthTopic: " << sParam);
+			_basicDatasetPlayer->setGroundTruthTopic(sParam);
+		}
+		else
+			ROS_INFO_STREAM("Set groundTruthTopic: morenzhi");
+		if (privateNode.getParam("groundTruthRate", fParam))
+		{
+			ROS_INFO_STREAM("Set groundTruthRate: " << fParam);
+			_basicDatasetPlayer->setGroundTruthRate(fParam);
+		}
+		else
+			ROS_INFO_STREAM("Set groundTruthRate: morenzhi");
+	}
+	else
+	{
+		_basicDatasetPlayer->setPubGroundTruth(false);
+		ROS_INFO_STREAM("Set pubGroundTruth: FALSE");
 	}
 	
 	return true;
 }
 
-
 void DatasetPlayer::spin()
 {
-	// TODO
+	_basicDatasetPlayer->process();
 }
 
 } // end namespace dataset_player

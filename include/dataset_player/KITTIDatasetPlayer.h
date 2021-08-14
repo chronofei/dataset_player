@@ -9,7 +9,8 @@ namespace dataset_player
 class KITTIDatasetPlayer : public BasicDatasetPlayer
 {
 public:
-	KITTIDatasetPlayer();
+	KITTIDatasetPlayer(ros::NodeHandle node);
+	bool process();
 private:
 	// TODO
 }; // end class KITTIDataset
