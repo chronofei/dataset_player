@@ -10,7 +10,10 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   tf2
+  pcl_conversions
 )
+
+find_package(PCL REQUIRED)
 
 catkin_package(
 #  INCLUDE_DIRS include
@@ -22,6 +25,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 
 set(SRC
@@ -41,4 +45,5 @@ add_executable(${PROJECT_NAME}_node src/dataset_player_node.cpp)
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}
+  ${PCL_LIBRARIES}
 )

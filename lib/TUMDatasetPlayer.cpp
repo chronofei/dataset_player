@@ -11,7 +11,24 @@ TUMDatasetPlayer::TUMDatasetPlayer(ros::NodeHandle node)
 
 bool TUMDatasetPlayer::process()
 {
-	// TODO
+	if (getConfigureParam()._pubImageColor)
+	{
+		std::thread threadImageColor(&TUMDatasetPlayer::processImageColor, this);
+		threadImageColor.detach();
+	}
+
+	if (getConfigureParam()._pubImageDepth)
+	{
+		std::thread threadImageDepth(&TUMDatasetPlayer::processImageDepth, this);
+		threadImageDepth.detach();
+	}
+
+	if (getConfigureParam()._pubGroundTruth)
+	{
+		std::thread threadGroundTruth(&TUMDatasetPlayer::processGroundTruth, this);
+		threadGroundTruth.detach();
+	}
+
 	return true;
 }
 

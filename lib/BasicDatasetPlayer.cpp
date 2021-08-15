@@ -12,54 +12,76 @@ ConfigureParam::ConfigureParam()
 	_pubGroundTruth = false;
 }
 
-ConfigureParam::ConfigureParam(const bool pubPointCloud,  const std::string pointCloudTopic,  const float pointCloudRate,
-	           const bool pubImageColor,  const std::string imageColorTopic,  const float imageColorRate,
-	           const bool pubImageGry,    const std::string imageGryTopic,    const float imageGryRate,
-			   const bool pubImageDepth,  const std::string imageDepthTopic,  const float imageDepthRate,
-			   const bool pubGroundTruth, const std::string groundTruthTopic, const float groundTruthRate)
+ConfigureParam::ConfigureParam(const std::string pathOfDataset,    const std::string subDirectory,
+	const bool pubPointCloud,  const std::string pointCloudTopic,  const float pointCloudRate,  const std::string pointCloudFrameID,
+	const bool pubImageColor,  const std::string imageColorTopic,  const float imageColorRate,  const std::string imageColorFrameID,
+	const bool pubImageGry,    const std::string imageGryTopic,    const float imageGryRate,    const std::string imageGryFrameID,
+	const bool pubImageDepth,  const std::string imageDepthTopic,  const float imageDepthRate,  const std::string imageDepthFrameID,
+	const bool pubGroundTruth, const std::string groundTruthTopic, const float groundTruthRate, const std::string groundTruthFrameID)
 {
-	_pubPointCloud    = pubPointCloud;
-	_pointCloudTopic  = pointCloudTopic;
-	_pointCloudRate   = pointCloudRate;
+	_pathOfDataset      = pathOfDataset;
+	_subDirectory       = subDirectory;
 
-	_pubImageColor    = pubImageColor;
-	_imageColorTopic  = imageColorTopic;
-	_imageColorRate   = imageColorRate;
+	_pubPointCloud      = pubPointCloud;
+	_pointCloudTopic    = pointCloudTopic;
+	_pointCloudRate     = pointCloudRate;
+	_pointCloudFrameID  = pointCloudFrameID;
 
-	_pubImageGry      = pubImageGry;
-	_imageGryTopic    = imageGryTopic;
-	_imageGryRate     = imageGryRate;
+	_pubImageColor      = pubImageColor;
+	_imageColorTopic    = imageColorTopic;
+	_imageColorRate     = imageColorRate;
+	_imageColorFrameID  = imageColorFrameID;
 
-	_pubImageDepth    = pubImageDepth;
-	_imageDepthTopic  = imageDepthTopic;
-	_imageDepthRate   = imageDepthRate;
+	_pubImageGry        = pubImageGry;
+	_imageGryTopic      = imageGryTopic;
+	_imageGryRate       = imageGryRate;
+	_imageGryFrameID    = imageGryFrameID;
 
-	_pubGroundTruth   = pubGroundTruth;
-	_groundTruthTopic = groundTruthTopic;
-	_groundTruthRate  = groundTruthRate;
+	_pubImageDepth      = pubImageDepth;
+	_imageDepthTopic    = imageDepthTopic;
+	_imageDepthRate     = imageDepthRate;
+	_imageDepthFrameID  = imageDepthFrameID;
+
+	_pubGroundTruth     = pubGroundTruth;
+	_groundTruthTopic   = groundTruthTopic;
+	_groundTruthRate    = groundTruthRate;
+	_groundTruthFrameID = groundTruthFrameID;
 }
 
 ConfigureParam::ConfigureParam(const ConfigureParam & other)
 {
-	_pubPointCloud    = other._pubPointCloud;
-	_pointCloudTopic  = other._pointCloudTopic;
-	_pointCloudRate   = other._pointCloudRate;
+	_pathOfDataset      = other._pathOfDataset;
+	_subDirectory       = other._subDirectory;
 
-	_pubImageColor    = other._pubImageColor;
-	_imageColorTopic  = other._imageColorTopic;
-	_imageColorRate   = other._imageColorRate;
+	_pubPointCloud      = other._pubPointCloud;
+	_pointCloudTopic    = other._pointCloudTopic;
+	_pointCloudRate     = other._pointCloudRate;
+	_pointCloudFrameID  = other._pointCloudFrameID;
 
-	_pubImageGry      = other._pubImageGry;
-	_imageGryTopic    = other._imageGryTopic;
-	_imageGryRate     = other._imageGryRate;
+	_pubImageColor      = other._pubImageColor;
+	_imageColorTopic    = other._imageColorTopic;
+	_imageColorRate     = other._imageColorRate;
+	_imageColorFrameID  = other._imageColorFrameID;
 
-	_pubImageDepth    = other._pubImageDepth;
-	_imageDepthTopic  = other._imageDepthTopic;
-	_imageDepthRate   = other._imageDepthRate;
+	_pubImageGry        = other._pubImageGry;
+	_imageGryTopic      = other._imageGryTopic;
+	_imageGryRate       = other._imageGryRate;
+	_imageGryFrameID    = other._imageGryFrameID;
 
-	_pubGroundTruth   = other._pubGroundTruth;
-	_groundTruthTopic = other._groundTruthTopic;
-	_groundTruthRate  = other._groundTruthRate;
+	_pubImageDepth      = other._pubImageDepth;
+	_imageDepthTopic    = other._imageDepthTopic;
+	_imageDepthRate     = other._imageDepthRate;
+	_imageDepthFrameID  = other._imageDepthFrameID;
+
+	_pubGroundTruth     = other._pubGroundTruth;
+	_groundTruthTopic   = other._groundTruthTopic;
+	_groundTruthRate    = other._groundTruthRate;
+	_groundTruthFrameID = other._groundTruthFrameID;
+}
+
+ConfigureParam ConfigureParam::operator=(const ConfigureParam & other)
+{
+	return ConfigureParam(other);
 }
 
 BasicDatasetPlayer::BasicDatasetPlayer(ros::NodeHandle node)
@@ -77,7 +99,7 @@ void BasicDatasetPlayer::setPubPointCloud(bool flag)
 	if (flag)
 	{
 		_configureParam._pubPointCloud = true;
-		_pubPointCloud = _node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 1);
+		_pubPointCloud = _node.advertise<sensor_msgs::PointCloud2>(_configureParam._pointCloudTopic, 1);
 	}
 	else
 		_configureParam._pubPointCloud = false;
@@ -91,6 +113,70 @@ void BasicDatasetPlayer::setPointCloudTopic(std::string pointCloudTopic)
 void BasicDatasetPlayer::setPointCloudRate(float pointCloudRate)
 {
 	_configureParam._pointCloudRate = pointCloudRate;
+}
+
+void BasicDatasetPlayer::setPointCloudFrameID(std::string pointCloudFrameID)
+{
+	_configureParam._pointCloudFrameID = pointCloudFrameID;
+}
+
+void BasicDatasetPlayer::processPointCloud()
+{
+	ros::Rate loop_rate(_configureParam._pointCloudRate);
+
+	std::cout << "=========Start playing point cloud message========" << std::endl;
+	
+	int count = 0;
+	while(ros::ok())
+	{
+		sensor_msgs::PointCloud2 pointcloud2;
+		pcl::PointCloud<pcl::PointXYZI> pointcloud;
+
+		std::stringstream ss;
+		ss << std::setfill('0') << std::setw(6) << count++;
+		std::ifstream fin(_configureParam._pathOfDataset + "/sequences/" + _configureParam._subDirectory + "/velodyne/" + ss.str() + ".bin", std::ios::binary | std::ios::in);
+
+		if(!fin.is_open())
+		{
+			std::cout << "can't open the file " + _configureParam._pathOfDataset + "/sequences/" + _configureParam._subDirectory + "/velodyne/" + ss.str() + ".bin" << std::endl;
+			break;
+		}
+
+		float px, py, pz, pr;
+		while(fin.read((char *)&px, sizeof(px)) &&
+			  fin.read((char *)&py, sizeof(py)) &&
+			  fin.read((char *)&pz, sizeof(pz)) &&
+			  fin.read((char *)&pr, sizeof(pr)))
+		{
+			pcl::PointXYZI point;
+			point.x = px;
+			point.y = py;
+			point.z = pz;
+			point.intensity = pr;
+			pointcloud.points.push_back(point);
+		}
+
+		pointcloud.width = pointcloud.points.size();
+		pointcloud.height = 1;
+
+		fin.close();
+
+		pcl::toROSMsg(pointcloud, pointcloud2);
+
+		pointcloud2.header.stamp    = ros::Time::now();
+		pointcloud2.header.frame_id = _configureParam._pointCloudFrameID;
+		pointcloud2.header.seq      = count;
+
+		_pubPointCloud.publish(pointcloud2);
+
+		ros::spinOnce();
+
+		loop_rate.sleep();
+	}
+
+	std::cout << "========End of play========" << std::endl;
+
+	return;
 }
 
 void BasicDatasetPlayer::setPubImageColor(bool flag)
@@ -108,6 +194,16 @@ void BasicDatasetPlayer::setImageColorRate(float imageColorRate)
 	_configureParam._imageColorRate = imageColorRate;
 }
 
+void BasicDatasetPlayer::setImageColorFrameID(std::string imageColorFrameID)
+{
+	_configureParam._imageColorFrameID = imageColorFrameID;
+}
+
+void BasicDatasetPlayer::processImageColor()
+{
+	// TODO
+}
+
 void BasicDatasetPlayer::setPubImageGry(bool flag)
 {
 	_configureParam._pubImageGry = flag;
@@ -121,6 +217,16 @@ void BasicDatasetPlayer::setImageGryTopic(std::string imageGryTopic)
 void BasicDatasetPlayer::setImageGryRate(float imageGryRate)
 {
 	_configureParam._imageGryRate = imageGryRate;
+}
+
+void BasicDatasetPlayer::setImageGryFrameID(std::string imageColorFrameID)
+{
+	_configureParam._imageGryFrameID = _configureParam._imageGryFrameID;
+}
+
+void BasicDatasetPlayer::processImageGry()
+{
+	// TODO
 }
 
 void BasicDatasetPlayer::setPubImageDepth(bool flag)
@@ -138,6 +244,16 @@ void BasicDatasetPlayer::setImageDepthRate(float imageDepthRate)
 	_configureParam._imageDepthTopic = imageDepthRate;
 }
 
+void BasicDatasetPlayer::setImageDepthFrameID(std::string imageDepthFrameID)
+{
+	_configureParam._imageDepthFrameID = imageDepthFrameID;
+}
+
+void BasicDatasetPlayer::processImageDepth()
+{
+	// TODO
+}
+
 void BasicDatasetPlayer::setPubGroundTruth(bool flag)
 {
 	_configureParam._pubGroundTruth = flag;
@@ -152,4 +268,26 @@ void BasicDatasetPlayer::setGroundTruthRate(float groundTruthRate)
 {
 	_configureParam._groundTruthTopic = groundTruthRate;
 }
+
+void BasicDatasetPlayer::setGroundTruthFrameID(std::string groundTruthFrameID)
+{
+	_configureParam._groundTruthFrameID = groundTruthFrameID;
+}
+
+void BasicDatasetPlayer::processGroundTruth()
+{
+	// TODO
+}
+
+const ConfigureParam & BasicDatasetPlayer::getConfigureParam()
+{
+	return _configureParam;
+}
+
+void BasicDatasetPlayer::setConfigureParam(const ConfigureParam & configureParam)
+{
+	_configureParam = configureParam;
+}
+
+
 } // end namespace dataset_player

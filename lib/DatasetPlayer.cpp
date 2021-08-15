@@ -44,7 +44,6 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 	{
 		if (privateNode.getParam("pubImageDepth", bParam) && bParam)
 		{
-			_basicDatasetPlayer->setPubImageDepth(true);
 			ROS_INFO_STREAM("Set pubImageDepth: TRUE");
 			if (privateNode.getParam("imageDepthTopic", sParam))
 			{
@@ -60,6 +59,14 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 			}
 			else
 				ROS_INFO_STREAM("Set imageDepthRate: morenzhi");
+			if (privateNode.getParam("imageDepthFrameID", sParam))
+			{
+				ROS_INFO_STREAM("Set imageDepthFrameID: " << sParam);
+				_basicDatasetPlayer->setImageDepthFrameID(sParam);
+			}
+			else
+				ROS_INFO_STREAM("Set imageDepthFrameID: morenzhi");
+			_basicDatasetPlayer->setPubImageDepth(true);
 		}
 		else
 		{
@@ -71,7 +78,6 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 	{
 		if (privateNode.getParam("pubPointCloud", bParam) && bParam)
 		{
-			_basicDatasetPlayer->setPubPointCloud(true);
 			ROS_INFO_STREAM("Set pubPointCloud: TRUE");
 			if (privateNode.getParam("pointCloudTopic", sParam))
 			{
@@ -87,6 +93,14 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 			}
 			else
 				ROS_INFO_STREAM("Set pointCloudRate: morenzhi");
+			if (privateNode.getParam("pointCloudFrameID", sParam))
+			{
+				ROS_INFO_STREAM("Set pointCloudFramdID: " << sParam);
+				_basicDatasetPlayer->setPointCloudFrameID(sParam);
+			}
+			else
+				ROS_INFO_STREAM("Set pointCloudFrameID: morenzhi");
+			_basicDatasetPlayer->setPubPointCloud(true);
 		}
 		else
 		{
@@ -96,7 +110,6 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 
 		if (privateNode.getParam("pubImageGry", bParam) && bParam)
 		{
-			_basicDatasetPlayer->setPubImageGry(true);
 			ROS_INFO_STREAM("Set pubImageGry: TRUE");
 			if (privateNode.getParam("imageGryTopic", sParam))
 			{
@@ -112,6 +125,14 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 			}
 			else
 				ROS_INFO_STREAM("Set imageGryRate: morenzhi");
+			if (privateNode.getParam("imageGryFrameID", sParam))
+			{
+				ROS_INFO_STREAM("Set imageGryFrameID: " << sParam);
+				_basicDatasetPlayer->setImageGryFrameID(sParam);
+			}
+			else
+				ROS_INFO_STREAM("Set imageGryFrameID: morenzhi");
+			_basicDatasetPlayer->setPubImageGry(true);
 		}
 		else
 		{
@@ -122,7 +143,6 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 
 	if (privateNode.getParam("pubImageColor", bParam) && bParam)
 	{
-		_basicDatasetPlayer->setPubImageColor(true);
 		ROS_INFO_STREAM("Set pubImageColor: TRUE");
 		if (privateNode.getParam("imageColorTopic", sParam))
 		{
@@ -138,6 +158,14 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 		}
 		else
 			ROS_INFO_STREAM("Set imageColorRate: morenzhi");
+		if (privateNode.getParam("imageColorFrameID", sParam))
+		{
+			ROS_INFO_STREAM("Set imageColorFrameID: " << sParam);
+			_basicDatasetPlayer->setImageColorFrameID(sParam);
+		}
+		else
+			ROS_INFO_STREAM("Set imageColorFrameID: morenzhi");
+		_basicDatasetPlayer->setPubImageColor(true);
 	}
 	else
 	{
@@ -147,7 +175,6 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 
 	if (privateNode.getParam("pubGroundTruth", bParam) && bParam)
 	{
-		_basicDatasetPlayer->setPubGroundTruth(true);
 		ROS_INFO_STREAM("Set pubGroundTruth: TRUE");
 		if (privateNode.getParam("groundTruthTopic", sParam))
 		{
@@ -163,6 +190,14 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 		}
 		else
 			ROS_INFO_STREAM("Set groundTruthRate: morenzhi");
+		if (privateNode.getParam("groundTruthFrameID", sParam))
+		{
+			ROS_INFO_STREAM("Set groundTruthFrameID: " << sParam);
+			_basicDatasetPlayer->setGroundTruthFrameID(sParam);
+		}
+		else
+			ROS_INFO_STREAM("Set groundTruthFrameID: morenzhi");
+		_basicDatasetPlayer->setPubGroundTruth(true);
 	}
 	else
 	{
