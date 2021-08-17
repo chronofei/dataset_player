@@ -101,6 +101,9 @@ public:
 	const ConfigureParam & getConfigureParam();
 	void setConfigureParam(const ConfigureParam & configureParam);
 
+	void setPathOfDataset(std::string pathOfDataset);
+	void setSubDirectory(std::string subDirectory);
+
 private:
 	ConfigureParam _configureParam;
 

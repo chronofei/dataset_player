@@ -123,8 +123,6 @@ void BasicDatasetPlayer::setPointCloudFrameID(std::string pointCloudFrameID)
 void BasicDatasetPlayer::processPointCloud()
 {
 	ros::Rate loop_rate(_configureParam._pointCloudRate);
-
-	std::cout << "=========Start playing point cloud message========" << std::endl;
 	
 	int count = 0;
 	while(ros::ok())
@@ -134,7 +132,8 @@ void BasicDatasetPlayer::processPointCloud()
 
 		std::stringstream ss;
 		ss << std::setfill('0') << std::setw(6) << count++;
-		std::ifstream fin(_configureParam._pathOfDataset + "/sequences/" + _configureParam._subDirectory + "/velodyne/" + ss.str() + ".bin", std::ios::binary | std::ios::in);
+		std::string filename = _configureParam._pathOfDataset + "/data_odometry_velodyne/dataset/sequences/" + _configureParam._subDirectory + "/velodyne/" + ss.str() + ".bin";
+		std::ifstream fin(filename, std::ios::binary | std::ios::in);
 
 		if(!fin.is_open())
 		{
@@ -159,6 +158,8 @@ void BasicDatasetPlayer::processPointCloud()
 		pointcloud.width = pointcloud.points.size();
 		pointcloud.height = 1;
 
+		ROS_INFO_STREAM("Read " << pointcloud.points.size() << " points from " << ss.str() + ".bin" << " file.");
+
 		fin.close();
 
 		pcl::toROSMsg(pointcloud, pointcloud2);
@@ -173,8 +174,6 @@ void BasicDatasetPlayer::processPointCloud()
 
 		loop_rate.sleep();
 	}
-
-	std::cout << "========End of play========" << std::endl;
 
 	return;
 }
@@ -287,6 +286,16 @@ const ConfigureParam & BasicDatasetPlayer::getConfigureParam()
 void BasicDatasetPlayer::setConfigureParam(const ConfigureParam & configureParam)
 {
 	_configureParam = configureParam;
+}
+
+void BasicDatasetPlayer::setPathOfDataset(std::string pathOfDataset)
+{
+	_configureParam._pathOfDataset = pathOfDataset;
+}
+
+void BasicDatasetPlayer::setSubDirectory(std::string subDirectory)
+{
+	_configureParam._subDirectory = subDirectory;
 }
 
 

@@ -204,6 +204,22 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 		_basicDatasetPlayer->setPubGroundTruth(false);
 		ROS_INFO_STREAM("Set pubGroundTruth: FALSE");
 	}
+
+	if (privateNode.getParam("pathOfDataset", sParam))
+	{
+		ROS_INFO_STREAM("Set pathOfDataset: " << sParam);
+		_basicDatasetPlayer->setPathOfDataset(sParam);
+	}
+	else
+		ROS_INFO_STREAM("Set pathOfDataset: morenzhi");
+
+	if (privateNode.getParam("subDirectory", sParam))
+	{
+		ROS_INFO_STREAM("Set subDirectory: " << sParam);
+		_basicDatasetPlayer->setSubDirectory(sParam);
+	}
+	else
+		ROS_INFO_STREAM("Set subDirectory: morenzhi");
 	
 	return true;
 }
@@ -211,6 +227,8 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 void DatasetPlayer::spin()
 {
 	_basicDatasetPlayer->process();
+
+	ros::spin();
 }
 
 } // end namespace dataset_player
