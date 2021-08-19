@@ -87,7 +87,7 @@ bool KITTIDatasetPlayer::setup()
 
 	if (getConfigureParam()._pubImageGry || getConfigureParam()._pubImageColor)
 	{
-		if (_privateNode.getParam("isStereo", bParam))
+		if (_privateNode.getParam("isStereo", bParam) && bParam)
 		{
 			ROS_INFO_STREAM("Set isStereo: TRUE");
 			getConfigureParam()._isStereo = true;

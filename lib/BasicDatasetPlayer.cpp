@@ -114,7 +114,7 @@ void BasicDatasetPlayer::processPointCloud()
 	return;
 }
 
-bool BasicDatasetPlayer::readImage(const std::string & filename, cv::Mat image, TopicType topicType)
+bool BasicDatasetPlayer::readImage(const std::string & filename, cv::Mat & image, TopicType topicType)
 {
 	if (topicType == TopicType::ImageColor)
 		image = cv::imread(filename, CV_LOAD_IMAGE_COLOR);
@@ -133,7 +133,7 @@ bool BasicDatasetPlayer::readImage(const std::string & filename, cv::Mat image, 
 	return true;
 }
 
-bool BasicDatasetPlayer::initImage(sensor_msgs::ImagePtr imagePtr, uint seq, TopicType topicType, bool left)
+bool BasicDatasetPlayer::initImage(sensor_msgs::ImagePtr & imagePtr, uint seq, TopicType topicType, bool left)
 {
 	std::string filename;
 
@@ -181,6 +181,8 @@ void BasicDatasetPlayer::processImage(TopicType topicType, bool isStereo)
 	{
 		sensor_msgs::ImagePtr imageLeft;
 		sensor_msgs::ImagePtr imageRight;
+
+		initImage(imageLeft, seq, topicType, true);
 
 		if (!initImage(imageLeft, seq, topicType, true))
 		{

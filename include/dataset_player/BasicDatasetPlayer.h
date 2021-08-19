@@ -77,8 +77,8 @@ public:
 	virtual bool readPointCloud(const std::string & filename, pcl::PointCloud<pcl::PointXYZI> & pointcloud){}
 
 	void processImage(TopicType topicType, bool isStereo);
-	bool initImage(sensor_msgs::ImagePtr imagePtr, uint seq, TopicType topicType, bool left);
-	bool readImage(const std::string & filename, cv::Mat image, TopicType topicType);
+	bool initImage(sensor_msgs::ImagePtr & imagePtr, uint seq, TopicType topicType, bool left);
+	bool readImage(const std::string & filename, cv::Mat & image, TopicType topicType);
 
 	void processGroundTruth();
 	bool initGroundTruth();
