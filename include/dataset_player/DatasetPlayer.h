@@ -10,12 +10,6 @@
 namespace dataset_player
 {
 
-enum DatasetType
-{
-	KITTI = 0,
-	TUM = 1
-};
-
 class DatasetPlayer
 {
 public:
@@ -24,8 +18,6 @@ public:
 	void spin();
 private:
 	BasicDatasetPlayer *_basicDatasetPlayer;
-
-	DatasetType _datasetType;
 }; // end class DatasetPlayer
 
 } // end namespace dataset_player

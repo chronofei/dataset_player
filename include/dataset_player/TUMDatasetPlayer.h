@@ -12,10 +12,11 @@ namespace dataset_player
 class TUMDatasetPlayer : public BasicDatasetPlayer
 {
 public:
-	TUMDatasetPlayer(ros::NodeHandle node);
-	bool process();
+	TUMDatasetPlayer(ros::NodeHandle & node, ros::NodeHandle & privateNode);
+	bool setup();
 private:
-	// TODO
+	ros::NodeHandle _node;
+	ros::NodeHandle _privateNode;
 }; // end class TUMDataset
 
 } // end namespace dataset_player

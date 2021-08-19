@@ -3,14 +3,20 @@
 // C/C++
 #include <iostream>
 #include <string>
+#include <thread>
 
 // ros
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include<pcl_conversions/pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 // pcl
 #include<pcl/point_cloud.h>
+
+// opencv
+#include <image_transport/image_transport.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 // dataset_player
 #include "dataset_player/common.h"
@@ -18,18 +24,19 @@
 namespace dataset_player
 {
 
+enum TopicType
+{
+	PointCloud  = 0,
+	ImageColor  = 1,
+	ImageGry    = 2,
+	ImageDepth  = 3,
+	GroundTruth = 4
+};
+
 class ConfigureParam
 {
 public:
 	ConfigureParam();
-	ConfigureParam(const std::string pathOfDataset,    const std::string subDirectory,
-				   const bool pubPointCloud,  const std::string pointCloudTopic,  const float pointCloudRate,  const std::string pointCloudFrameID,
-		           const bool pubImageColor,  const std::string imageColorTopic,  const float imageColorRate,  const std::string imageColorFrameID,
-		           const bool pubImageGry,    const std::string imageGryTopic,    const float imageGryRate,    const std::string imageGryFrameID,
-				   const bool pubImageDepth,  const std::string imageDepthTopic,  const float imageDepthRate,  const std::string imageDepthFrameID,
-				   const bool pubGroundTruth, const std::string groundTruthTopic, const float groundTruthRate, const std::string groundTruthFrameID);
-	ConfigureParam(const ConfigureParam & other);
-	ConfigureParam operator=(const ConfigureParam & other);
 
 	bool        _pubPointCloud;
 	std::string _pointCloudTopic;
@@ -37,19 +44,13 @@ public:
 	std::string _pointCloudFrameID;
 
 	bool        _pubImageColor;
-	std::string _imageColorTopic;
-	float       _imageColorRate;
-	std::string _imageColorFrameID;
-
 	bool        _pubImageGry;
-	std::string _imageGryTopic;
-	float       _imageGryRate;
-	std::string _imageGryFrameID;
-
 	bool        _pubImageDepth;
-	std::string _imageDepthTopic;
-	float       _imageDepthRate;
-	std::string _imageDepthFrameID;
+	bool        _isStereo;
+	std::string _imageTopic;
+	float       _imageRate;
+	std::string _imageFrameID;
+
 
 	bool        _pubGroundTruth;
 	std::string _groundTruthTopic;
@@ -58,62 +59,35 @@ public:
 
 	std::string _pathOfDataset;
 	std::string _subDirectory;
-
-
 }; // end class ConfigureParam
 
 class BasicDatasetPlayer
 {
 public:
-	BasicDatasetPlayer(ros::NodeHandle node);
-	virtual bool process();
+	BasicDatasetPlayer(ros::NodeHandle & node);
+	bool process();
+	ConfigureParam & getConfigureParam(){return _configureParam;};
 
-	void setPubPointCloud(bool flag);
-	void setPointCloudTopic(std::string pointCloudTopic);
-	void setPointCloudRate(float pointCloudRate);
-	void setPointCloudFrameID(std::string pointCloudFrameID);
+	virtual bool setup(){}
+	virtual bool initFilename(std::string & filename, const TopicType topicType, 
+							  const std::string & pathOfDataset, const std::string & subDirectory, uint seq, bool left = true){};
+
 	void processPointCloud();
+	bool initPointCloud(sensor_msgs::PointCloud2 & pointcloud2, uint seq);
+	virtual bool readPointCloud(const std::string & filename, pcl::PointCloud<pcl::PointXYZI> & pointcloud){}
 
-	void setPubImageColor(bool flag);
-	void setImageColorTopic(std::string imageColorTopic);
-	void setImageColorRate(float imageColorRate);
-	void setImageColorFrameID(std::string imageColorFrameID);
-	void processImageColor();
+	void processImage(TopicType topicType, bool isStereo);
+	bool initImage(sensor_msgs::ImagePtr imagePtr, uint seq, TopicType topicType, bool left);
+	bool readImage(const std::string & filename, cv::Mat image, TopicType topicType);
 
-	void setPubImageGry(bool flag);
-	void setImageGryTopic(std::string imageGryTopic);
-	void setImageGryRate(float imageGryRate);
-	void setImageGryFrameID(std::string imageColorFrameID);
-	void processImageGry();
-
-	void setPubImageDepth(bool flag);
-	void setImageDepthTopic(std::string imageDepthTopic);
-	void setImageDepthRate(float imageDepthRate);
-	void setImageDepthFrameID(std::string imageDepthFrameID);
-	void processImageDepth();
-
-	void setPubGroundTruth(bool flag);
-	void setGroundTruthTopic(std::string groundTruthTopic);
-	void setGroundTruthRate(float groundTruthRate);
-	void setGroundTruthFrameID(std::string groundTruthFrameID);
 	void processGroundTruth();
-
-	const ConfigureParam & getConfigureParam();
-	void setConfigureParam(const ConfigureParam & configureParam);
-
-	void setPathOfDataset(std::string pathOfDataset);
-	void setSubDirectory(std::string subDirectory);
+	bool initGroundTruth();
+	virtual bool readGroundTruth(const std::string & filename, pcl::PointCloud<pcl::PointXYZI> & pointcloud){}
 
 private:
 	ConfigureParam _configureParam;
 
 	ros::NodeHandle _node;
-
-	ros::Publisher _pubPointCloud;
-	ros::Publisher _pubImageColor;
-	ros::Publisher _pubImageGry;
-	ros::Publisher _pubImageDepth;
-	ros::Publisher _pubGroundTruth;
 }; // end class BasicDatasetPlayer
 
 } // end namespace dataset_player

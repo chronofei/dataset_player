@@ -4,14 +4,23 @@
 #include <iostream>
 #include <string>
 
+// ros
+#include <ros/ros.h>
+
+// pcl
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+
 namespace dataset_player
 {
-
-enum FileType
+	
+template <typename T>
+void initHeader(T & msg, const ros::Time& stamp, const std::string frameID, const uint seq)
 {
-	BIN = 0,
-	PNG = 1,
-	TXT = 2
-};
+	msg.header.stamp    = stamp;
+	msg.header.frame_id = frameID;
+	msg.header.seq      = seq;
+	return;
+}
 
 } // end namespace dataset_player

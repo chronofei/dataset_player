@@ -5,297 +5,209 @@ namespace dataset_player
 
 ConfigureParam::ConfigureParam()
 {
-	_pubPointCloud  = true;
+	_pubPointCloud  = false;
 	_pubImageColor  = false;
 	_pubImageGry    = false;
 	_pubImageDepth  = false;
 	_pubGroundTruth = false;
 }
 
-ConfigureParam::ConfigureParam(const std::string pathOfDataset,    const std::string subDirectory,
-	const bool pubPointCloud,  const std::string pointCloudTopic,  const float pointCloudRate,  const std::string pointCloudFrameID,
-	const bool pubImageColor,  const std::string imageColorTopic,  const float imageColorRate,  const std::string imageColorFrameID,
-	const bool pubImageGry,    const std::string imageGryTopic,    const float imageGryRate,    const std::string imageGryFrameID,
-	const bool pubImageDepth,  const std::string imageDepthTopic,  const float imageDepthRate,  const std::string imageDepthFrameID,
-	const bool pubGroundTruth, const std::string groundTruthTopic, const float groundTruthRate, const std::string groundTruthFrameID)
+BasicDatasetPlayer::BasicDatasetPlayer(ros::NodeHandle & node)
 {
-	_pathOfDataset      = pathOfDataset;
-	_subDirectory       = subDirectory;
-
-	_pubPointCloud      = pubPointCloud;
-	_pointCloudTopic    = pointCloudTopic;
-	_pointCloudRate     = pointCloudRate;
-	_pointCloudFrameID  = pointCloudFrameID;
-
-	_pubImageColor      = pubImageColor;
-	_imageColorTopic    = imageColorTopic;
-	_imageColorRate     = imageColorRate;
-	_imageColorFrameID  = imageColorFrameID;
-
-	_pubImageGry        = pubImageGry;
-	_imageGryTopic      = imageGryTopic;
-	_imageGryRate       = imageGryRate;
-	_imageGryFrameID    = imageGryFrameID;
-
-	_pubImageDepth      = pubImageDepth;
-	_imageDepthTopic    = imageDepthTopic;
-	_imageDepthRate     = imageDepthRate;
-	_imageDepthFrameID  = imageDepthFrameID;
-
-	_pubGroundTruth     = pubGroundTruth;
-	_groundTruthTopic   = groundTruthTopic;
-	_groundTruthRate    = groundTruthRate;
-	_groundTruthFrameID = groundTruthFrameID;
+	_node = node;	
 }
 
-ConfigureParam::ConfigureParam(const ConfigureParam & other)
-{
-	_pathOfDataset      = other._pathOfDataset;
-	_subDirectory       = other._subDirectory;
-
-	_pubPointCloud      = other._pubPointCloud;
-	_pointCloudTopic    = other._pointCloudTopic;
-	_pointCloudRate     = other._pointCloudRate;
-	_pointCloudFrameID  = other._pointCloudFrameID;
-
-	_pubImageColor      = other._pubImageColor;
-	_imageColorTopic    = other._imageColorTopic;
-	_imageColorRate     = other._imageColorRate;
-	_imageColorFrameID  = other._imageColorFrameID;
-
-	_pubImageGry        = other._pubImageGry;
-	_imageGryTopic      = other._imageGryTopic;
-	_imageGryRate       = other._imageGryRate;
-	_imageGryFrameID    = other._imageGryFrameID;
-
-	_pubImageDepth      = other._pubImageDepth;
-	_imageDepthTopic    = other._imageDepthTopic;
-	_imageDepthRate     = other._imageDepthRate;
-	_imageDepthFrameID  = other._imageDepthFrameID;
-
-	_pubGroundTruth     = other._pubGroundTruth;
-	_groundTruthTopic   = other._groundTruthTopic;
-	_groundTruthRate    = other._groundTruthRate;
-	_groundTruthFrameID = other._groundTruthFrameID;
-}
-
-ConfigureParam ConfigureParam::operator=(const ConfigureParam & other)
-{
-	return ConfigureParam(other);
-}
-
-BasicDatasetPlayer::BasicDatasetPlayer(ros::NodeHandle node)
-{
-	_node        = node;
-}
+bool _endOfPointCloud   = true;
+bool _endOfImageGry     = true;
+bool _endOfImageColor   = true;
+bool _endOfImageDepth   = true;
+bool _endOfGroundTruth  = true;
 
 bool BasicDatasetPlayer::process()
 {
-	// TODO
-}
-
-void BasicDatasetPlayer::setPubPointCloud(bool flag)
-{
-	if (flag)
+	if (getConfigureParam()._pubPointCloud)
 	{
-		_configureParam._pubPointCloud = true;
-		_pubPointCloud = _node.advertise<sensor_msgs::PointCloud2>(_configureParam._pointCloudTopic, 1);
+		ROS_INFO_STREAM("Begin point cloud thread!");
+		_endOfPointCloud = false;
+		std::thread threadPointCloud(&BasicDatasetPlayer::processPointCloud, this);
+		threadPointCloud.detach();
 	}
-	else
-		_configureParam._pubPointCloud = false;
+
+	if (getConfigureParam()._pubImageColor)
+	{
+		ROS_INFO_STREAM("Begin image color thread!");
+		_endOfImageColor = false;
+		std::thread threadImageColor(&BasicDatasetPlayer::processImage, this, TopicType::ImageColor, _configureParam._isStereo);
+		threadImageColor.detach();
+	}
+
+	if (getConfigureParam()._pubImageGry)
+	{
+		ROS_INFO_STREAM("Begin image gry thread!");
+		_endOfImageGry = false;
+		std::thread threadImageGry(&BasicDatasetPlayer::processImage, this, TopicType::ImageGry, _configureParam._isStereo);
+		threadImageGry.detach();
+	}
+
+	if (getConfigureParam()._pubImageDepth)
+	{
+		ROS_INFO_STREAM("Begin image gry thread!");
+		_endOfImageDepth = false;
+		std::thread threadImageDepth(&BasicDatasetPlayer::processImage, this, TopicType::ImageDepth, false);
+		threadImageDepth.detach();
+	}
+
+	if (getConfigureParam()._pubGroundTruth)
+	{
+		ROS_INFO_STREAM("Begin ground truth thread!");
+		_endOfGroundTruth = false;
+		std::thread threadGroundTruth(&BasicDatasetPlayer::processGroundTruth, this);
+		threadGroundTruth.detach();
+	}
+
+	while (ros::ok() && (!_endOfPointCloud || !_endOfImageColor || !_endOfImageGry || !_endOfImageDepth || !_endOfGroundTruth))
+		ros::spinOnce();
+	
+	return true;
 }
 
-void BasicDatasetPlayer::setPointCloudTopic(std::string pointCloudTopic)
+bool BasicDatasetPlayer::initPointCloud(sensor_msgs::PointCloud2 & pointcloud2, uint seq)
 {
-	_configureParam._pointCloudTopic = pointCloudTopic;
-}
+	pcl::PointCloud<pcl::PointXYZI> pointcloud;
 
-void BasicDatasetPlayer::setPointCloudRate(float pointCloudRate)
-{
-	_configureParam._pointCloudRate = pointCloudRate;
-}
+	std::string filename;
 
-void BasicDatasetPlayer::setPointCloudFrameID(std::string pointCloudFrameID)
-{
-	_configureParam._pointCloudFrameID = pointCloudFrameID;
+	initFilename(filename, TopicType::PointCloud, _configureParam._pathOfDataset, _configureParam._subDirectory, seq);
+
+	if (!readPointCloud(filename, pointcloud))
+		return false;
+
+	pcl::toROSMsg(pointcloud, pointcloud2);
+
+	initHeader(pointcloud2, ros::Time::now(), _configureParam._pointCloudFrameID, seq);
+
+	ROS_INFO_STREAM("Read " << seq << "th pointcloud from " << filename.substr(0, filename.find_last_of("/")) << " directory.");
+
+	return true;
 }
 
 void BasicDatasetPlayer::processPointCloud()
 {
+	ros::Publisher _pubPointCloud = _node.advertise<sensor_msgs::PointCloud2>(_configureParam._pointCloudTopic, 1);
+
 	ros::Rate loop_rate(_configureParam._pointCloudRate);
 	
-	int count = 0;
+	uint seq = 0;
 	while(ros::ok())
 	{
 		sensor_msgs::PointCloud2 pointcloud2;
-		pcl::PointCloud<pcl::PointXYZI> pointcloud;
-
-		std::stringstream ss;
-		ss << std::setfill('0') << std::setw(6) << count++;
-		std::string filename = _configureParam._pathOfDataset + "/data_odometry_velodyne/dataset/sequences/" + _configureParam._subDirectory + "/velodyne/" + ss.str() + ".bin";
-		std::ifstream fin(filename, std::ios::binary | std::ios::in);
-
-		if(!fin.is_open())
+		if (!initPointCloud(pointcloud2, seq))
 		{
-			std::cout << "can't open the file " + _configureParam._pathOfDataset + "/sequences/" + _configureParam._subDirectory + "/velodyne/" + ss.str() + ".bin" << std::endl;
+			_endOfPointCloud   = true;
 			break;
 		}
-
-		float px, py, pz, pr;
-		while(fin.read((char *)&px, sizeof(px)) &&
-			  fin.read((char *)&py, sizeof(py)) &&
-			  fin.read((char *)&pz, sizeof(pz)) &&
-			  fin.read((char *)&pr, sizeof(pr)))
-		{
-			pcl::PointXYZI point;
-			point.x = px;
-			point.y = py;
-			point.z = pz;
-			point.intensity = pr;
-			pointcloud.points.push_back(point);
-		}
-
-		pointcloud.width = pointcloud.points.size();
-		pointcloud.height = 1;
-
-		ROS_INFO_STREAM("Read " << pointcloud.points.size() << " points from " << ss.str() + ".bin" << " file.");
-
-		fin.close();
-
-		pcl::toROSMsg(pointcloud, pointcloud2);
-
-		pointcloud2.header.stamp    = ros::Time::now();
-		pointcloud2.header.frame_id = _configureParam._pointCloudFrameID;
-		pointcloud2.header.seq      = count;
-
 		_pubPointCloud.publish(pointcloud2);
-
-		ros::spinOnce();
-
+		seq++;
 		loop_rate.sleep();
 	}
 
 	return;
 }
 
-void BasicDatasetPlayer::setPubImageColor(bool flag)
+bool BasicDatasetPlayer::readImage(const std::string & filename, cv::Mat image, TopicType topicType)
 {
-	_configureParam._pubImageColor = flag;
+	if (topicType == TopicType::ImageColor)
+		image = cv::imread(filename, CV_LOAD_IMAGE_COLOR);
+	else if (topicType == TopicType::ImageGry)
+		image = cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+	else if (topicType == TopicType::ImageDepth)
+		return false;
+
+	if (image.empty())
+	{
+		ROS_INFO_STREAM("can't read image data from " << filename.substr(filename.find_last_of("/")+1) << " file.");
+		return false;
+	}
+
+	ROS_INFO_STREAM("Read a " << image.rows << "x" << image.cols << ":" << image.channels() << " image from " << filename.substr(filename.find_last_of("/")+1) << " file.");
+	return true;
 }
 
-void BasicDatasetPlayer::setImageColorTopic(std::string imageColorTopic)
+bool BasicDatasetPlayer::initImage(sensor_msgs::ImagePtr imagePtr, uint seq, TopicType topicType, bool left)
 {
-	_configureParam._imageColorTopic = imageColorTopic;
+	std::string filename;
+
+	initFilename(filename, topicType, _configureParam._pathOfDataset, _configureParam._subDirectory, seq, left);
+
+	cv::Mat image;
+
+	if (!readImage(filename, image, topicType))
+		return false;
+
+	imagePtr = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
+
+	initHeader(*imagePtr, ros::Time::now(), _configureParam._imageFrameID, seq);
+
+	ROS_INFO_STREAM("Read " << seq << "th image from " << filename.substr(0, filename.find_last_of("/")) << " directory.");
+
+	return true;
 }
 
-void BasicDatasetPlayer::setImageColorRate(float imageColorRate)
+void BasicDatasetPlayer::processImage(TopicType topicType, bool isStereo)
 {
-	_configureParam._imageColorRate = imageColorRate;
-}
+	image_transport::ImageTransport it(_node);
+	image_transport::Publisher _pubImageLeft;
+	image_transport::Publisher _pubImageRight;
 
-void BasicDatasetPlayer::setImageColorFrameID(std::string imageColorFrameID)
-{
-	_configureParam._imageColorFrameID = imageColorFrameID;
-}
+	if (topicType == TopicType::ImageColor)
+	{
+		_pubImageLeft  = it.advertise(_configureParam._imageTopic + "/color/left", 1);
+		_pubImageRight = it.advertise(_configureParam._imageTopic + "/color/right", 1);
+	}
+	else if (topicType == TopicType::ImageGry)
+	{
+		_pubImageLeft  = it.advertise(_configureParam._imageTopic + "/gry/left", 1);
+		_pubImageRight = it.advertise(_configureParam._imageTopic + "/gry/right", 1);
+	}
+	else if (topicType == TopicType::ImageDepth)
+	{
+		return;
+	}
 
-void BasicDatasetPlayer::processImageColor()
-{
-	// TODO
-}
+	ros::Rate loop_rate(_configureParam._imageRate);
 
-void BasicDatasetPlayer::setPubImageGry(bool flag)
-{
-	_configureParam._pubImageGry = flag;
-}
+	uint seq = 0;
+	while(ros::ok())
+	{
+		sensor_msgs::ImagePtr imageLeft;
+		sensor_msgs::ImagePtr imageRight;
 
-void BasicDatasetPlayer::setImageGryTopic(std::string imageGryTopic)
-{
-	_configureParam._imageGryTopic = imageGryTopic;
-}
+		if (!initImage(imageLeft, seq, topicType, true))
+		{
+			if (topicType == TopicType::ImageColor)
+				_endOfImageColor = true;
+			else if (topicType == TopicType::ImageGry)
+				_endOfImageGry = true;
+			else if (topicType == TopicType::ImageDepth)
+				_endOfImageDepth = true;
+			break;
+		}
 
-void BasicDatasetPlayer::setImageGryRate(float imageGryRate)
-{
-	_configureParam._imageGryRate = imageGryRate;
-}
+		if (isStereo)
+			initImage(imageRight, seq, topicType, false);
 
-void BasicDatasetPlayer::setImageGryFrameID(std::string imageColorFrameID)
-{
-	_configureParam._imageGryFrameID = _configureParam._imageGryFrameID;
-}
-
-void BasicDatasetPlayer::processImageGry()
-{
-	// TODO
-}
-
-void BasicDatasetPlayer::setPubImageDepth(bool flag)
-{
-	_configureParam._pubImageDepth = flag;
-}
-
-void BasicDatasetPlayer::setImageDepthTopic(std::string imageDepthTopic)
-{
-	_configureParam._imageDepthTopic = imageDepthTopic;
-}
-
-void BasicDatasetPlayer::setImageDepthRate(float imageDepthRate)
-{
-	_configureParam._imageDepthTopic = imageDepthRate;
-}
-
-void BasicDatasetPlayer::setImageDepthFrameID(std::string imageDepthFrameID)
-{
-	_configureParam._imageDepthFrameID = imageDepthFrameID;
-}
-
-void BasicDatasetPlayer::processImageDepth()
-{
-	// TODO
-}
-
-void BasicDatasetPlayer::setPubGroundTruth(bool flag)
-{
-	_configureParam._pubGroundTruth = flag;
-}
-
-void BasicDatasetPlayer::setGroundTruthTopic(std::string groundTruthTopic)
-{
-	_configureParam._groundTruthTopic = groundTruthTopic;
-}
-
-void BasicDatasetPlayer::setGroundTruthRate(float groundTruthRate)
-{
-	_configureParam._groundTruthTopic = groundTruthRate;
-}
-
-void BasicDatasetPlayer::setGroundTruthFrameID(std::string groundTruthFrameID)
-{
-	_configureParam._groundTruthFrameID = groundTruthFrameID;
+		_pubImageLeft.publish(imageLeft);
+		if (isStereo)
+			_pubImageRight.publish(imageRight);
+			
+		seq++;
+		loop_rate.sleep();
+	}
 }
 
 void BasicDatasetPlayer::processGroundTruth()
 {
 	// TODO
-}
-
-const ConfigureParam & BasicDatasetPlayer::getConfigureParam()
-{
-	return _configureParam;
-}
-
-void BasicDatasetPlayer::setConfigureParam(const ConfigureParam & configureParam)
-{
-	_configureParam = configureParam;
-}
-
-void BasicDatasetPlayer::setPathOfDataset(std::string pathOfDataset)
-{
-	_configureParam._pathOfDataset = pathOfDataset;
-}
-
-void BasicDatasetPlayer::setSubDirectory(std::string subDirectory)
-{
-	_configureParam._subDirectory = subDirectory;
 }
 
 
