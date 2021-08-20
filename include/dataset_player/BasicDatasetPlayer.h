@@ -64,11 +64,11 @@ public:
 class BasicDatasetPlayer
 {
 public:
-	BasicDatasetPlayer(ros::NodeHandle & node);
+	BasicDatasetPlayer(ros::NodeHandle & node, ros::NodeHandle & privateNode);
 	bool process();
 	ConfigureParam & getConfigureParam(){return _configureParam;};
+	bool setup();
 
-	virtual bool setup(){}
 	virtual bool initFilename(std::string & filename, const TopicType topicType, 
 							  const std::string & pathOfDataset, const std::string & subDirectory, uint seq, bool left = true){};
 
@@ -88,6 +88,7 @@ private:
 	ConfigureParam _configureParam;
 
 	ros::NodeHandle _node;
+	ros::NodeHandle _privateNode;
 }; // end class BasicDatasetPlayer
 
 } // end namespace dataset_player

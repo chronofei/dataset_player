@@ -9,10 +9,13 @@ int main(int argc, char **argv)
 	
 	dataset_player::DatasetPlayer datasetPlayer;
 
-	if (datasetPlayer.setup(node, privateNode))
+	if (!datasetPlayer.setup(node, privateNode))
 	{
-		datasetPlayer.spin();
+		ROS_INFO_STREAM("Failed to initialize datasetplayer! Please check if the datasettype parameter is provided.");
+		return -1;
 	}
+
+	datasetPlayer.spin();
 
 	return 0;
 }

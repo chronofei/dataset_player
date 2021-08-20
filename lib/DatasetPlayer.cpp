@@ -5,7 +5,7 @@ namespace dataset_player
 
 DatasetPlayer::DatasetPlayer()
 {
-	// TODO
+	_basicDatasetPlayer = NULL;
 }
 
 bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
@@ -18,13 +18,11 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 		{
 			ROS_INFO_STREAM("Set datasetType: KITTI");
 			_basicDatasetPlayer = new KITTIDatasetPlayer(node, privateNode);
-			_basicDatasetPlayer->setup();
 		}
 		else if (sParam == "TUM")
 		{
 			ROS_INFO_STREAM("Set datasetType: TUM");
 			_basicDatasetPlayer = new TUMDatasetPlayer(node, privateNode);
-			_basicDatasetPlayer->setup();
 		}
 		else
 		{
@@ -43,7 +41,15 @@ bool DatasetPlayer::setup(ros::NodeHandle& node, ros::NodeHandle& privateNode)
 
 void DatasetPlayer::spin()
 {
+	if (!_basicDatasetPlayer->setup())
+	{
+		ROS_INFO_STREAM("Dataset Player setup fail! Please check if some necessary parameters are provided.");
+		return;
+	}
+
 	_basicDatasetPlayer->process();
+
+	return;
 }
 
 } // end namespace dataset_player

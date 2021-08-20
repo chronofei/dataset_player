@@ -12,9 +12,200 @@ ConfigureParam::ConfigureParam()
 	_pubGroundTruth = false;
 }
 
-BasicDatasetPlayer::BasicDatasetPlayer(ros::NodeHandle & node)
+BasicDatasetPlayer::BasicDatasetPlayer(ros::NodeHandle & node, ros::NodeHandle & privateNode)
 {
-	_node = node;	
+	_node        = node;
+	_privateNode = privateNode;
+}
+
+bool BasicDatasetPlayer::setup()
+{
+	std::string sParam;
+	bool        bParam;
+	float       fParam;
+
+	if (_privateNode.getParam("pathOfDataset", sParam))
+	{
+		ROS_INFO_STREAM("Set pathOfDataset: " << sParam);
+		getConfigureParam()._pathOfDataset = sParam;
+	}
+	else
+	{
+		ROS_INFO_STREAM("No pathofdataset parameter is provided. Please check!");
+		return false;
+	}
+
+	if (_privateNode.getParam("subDirectory", sParam))
+	{
+		ROS_INFO_STREAM("Set subDirectory: " << sParam);
+		getConfigureParam()._subDirectory = sParam;
+	}
+	else
+	{
+		ROS_INFO_STREAM("No subDirectory parameter is provided. Please check!");
+		return false;
+	}
+
+	if (_privateNode.getParam("pubPointCloud", bParam) && bParam)
+	{
+		ROS_INFO_STREAM("Set pubPointCloud: TRUE");
+		getConfigureParam()._pubPointCloud = true;
+		if (_privateNode.getParam("pointCloudTopic", sParam))
+		{
+			ROS_INFO_STREAM("Set pointCloudTopic: " << sParam);
+			getConfigureParam()._pointCloudTopic = sParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set pointCloudTopic as the default value: velodyne_points");
+			getConfigureParam()._pointCloudTopic = "velodyne_points";
+		}
+		if (_privateNode.getParam("pointCloudRate", fParam))
+		{
+			ROS_INFO_STREAM("Set pointCloudRate: " << fParam);
+			getConfigureParam()._pointCloudRate = fParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set pointCloudRate as the default value: 10.0");
+			getConfigureParam()._pointCloudRate = 10.0;
+		}
+		if (_privateNode.getParam("pointCloudFrameID", sParam))
+		{
+			ROS_INFO_STREAM("Set pointCloudFrameID: " << sParam);
+			getConfigureParam()._pointCloudFrameID = sParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set pointCloudFrameID as the default value: velodyne");
+			getConfigureParam()._pointCloudFrameID = "velodyne";
+		}
+	}
+	else
+	{
+		ROS_INFO_STREAM("Set pubPointCloud: FALSE");
+		getConfigureParam()._pubPointCloud = false;
+	}
+
+	if (_privateNode.getParam("pubImageColor", bParam) && bParam)
+	{
+		ROS_INFO_STREAM("Set pubImageColor: TRUE");
+		getConfigureParam()._pubImageColor = true;
+	}
+	else
+	{
+		getConfigureParam()._pubImageColor = false;
+		ROS_INFO_STREAM("Set pubImageColor: FALSE");
+	}
+
+	if (_privateNode.getParam("pubImageGry", bParam) && bParam)
+	{
+		ROS_INFO_STREAM("Set pubImageGry: TRUE");
+		getConfigureParam()._pubImageGry = true;
+	}
+	else
+	{
+		getConfigureParam()._pubImageGry = false;
+		ROS_INFO_STREAM("Set pubImageGry: FALSE");
+	}
+
+	if (_privateNode.getParam("pubImageDepth", bParam) && bParam)
+	{
+		ROS_INFO_STREAM("Set pubImageDepth: TRUE");
+		getConfigureParam()._pubImageDepth = true;
+	}
+	else
+	{
+		getConfigureParam()._pubImageDepth = false;
+		ROS_INFO_STREAM("Set pubImageDepth: FALSE");
+	}
+
+	if (getConfigureParam()._pubImageDepth || getConfigureParam()._pubImageGry || getConfigureParam()._pubImageColor)
+	{
+		if (_privateNode.getParam("isStereo", bParam) && bParam)
+		{
+			ROS_INFO_STREAM("Set isStereo: TRUE");
+			getConfigureParam()._isStereo = true;
+		}
+		else
+		{
+			getConfigureParam()._isStereo = false;
+			ROS_INFO_STREAM("Set isStereo: FALSE");
+		}
+		if (_privateNode.getParam("imageTopic", sParam))
+		{
+			ROS_INFO_STREAM("Set imageTopic: " << sParam);
+			getConfigureParam()._imageTopic = sParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set imageTopic as the default value: camera/image");
+			getConfigureParam()._imageTopic = "camera/image";
+		}
+		if (_privateNode.getParam("imageRate", fParam))
+		{
+			ROS_INFO_STREAM("Set imageRate: " << fParam);
+			getConfigureParam()._imageRate = fParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set imageRate as the default value: 10.0");
+			getConfigureParam()._imageRate = 10.0;
+		}
+		if (_privateNode.getParam("imageFrameID", sParam))
+		{
+			ROS_INFO_STREAM("Set imageFrameID: " << sParam);
+			getConfigureParam()._imageFrameID = sParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set imageFrameID as the default value: camera");
+			getConfigureParam()._imageFrameID = "camera";
+		}
+	}
+	
+	if (_privateNode.getParam("pubGroundTruth", bParam) && bParam)
+	{
+		ROS_INFO_STREAM("Set pubGroundTruth: TRUE");
+		getConfigureParam()._pubGroundTruth = true;
+		if (_privateNode.getParam("groundTruthTopic", sParam))
+		{
+			ROS_INFO_STREAM("Set groundTruthTopic: " << sParam);
+			getConfigureParam()._groundTruthTopic = sParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set groundTruthTopic as the default value: imu/data");
+			getConfigureParam()._groundTruthTopic = "imu/data";
+		}
+		if (_privateNode.getParam("groundTruthRate", fParam))
+		{
+			ROS_INFO_STREAM("Set groundTruthRate: " << fParam);
+			getConfigureParam()._groundTruthRate = fParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set groundTruthRate as the default value: 100.0");
+			getConfigureParam()._groundTruthRate = 100.0;
+		}
+		if (_privateNode.getParam("groundTruthFrameID", sParam))
+		{
+			ROS_INFO_STREAM("Set groundTruthFrameID: " << sParam);
+			getConfigureParam()._groundTruthFrameID = sParam;
+		}
+		else
+		{
+			ROS_INFO_STREAM("Set groundTruthFrameID as the default value: base_link");
+			getConfigureParam()._groundTruthFrameID = "base_link";
+		}
+	}
+	else
+	{
+		getConfigureParam()._pubGroundTruth = false;
+		ROS_INFO_STREAM("Set pubGroundTruth: FALSE");
+	}
+
+	return true;
 }
 
 bool _endOfPointCloud   = true;
